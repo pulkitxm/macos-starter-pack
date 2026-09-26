@@ -21,7 +21,7 @@ checks and signed release pipeline to ship it.
   verification, and a DMG you can download from the run.
 - Hygiene and security workflows: YAML, Markdown, links, workflow linting, gitleaks, semgrep,
   trivy, dependency review and OpenSSF Scorecard.
-- A one-click Release workflow that versions, builds, signs, packages and publishes a DMG with its
+- A Release workflow that runs on every push to `main` that touches the app and versions, builds, signs, packages and publishes a DMG with its
   checksum to GitHub Releases.
 - Signing that works with or without an Apple Developer account: ad-hoc out of the box, your own
   self-signed or Apple identity when you have one, and notarization with a Developer ID.
@@ -89,7 +89,7 @@ checks and signed release pipeline to ship it.
 
 ## Signing and releases
 
-Run the **Release** workflow from the Actions tab (or `make release`). It picks the next version
+Every push to `main` that changes the app, its resources, or the build scripts cuts a patch release automatically. For a minor or major bump, run the **Release** workflow from the Actions tab (or `make release BUMP=minor`). It picks the next version
 from the latest `v*` tag, runs the tests, builds and verifies the app, packages the DMG and
 publishes it with a `.sha256` file to GitHub Releases.
 
