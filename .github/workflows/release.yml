@@ -9,6 +9,7 @@ on:
       - "Package.swift"
       - "build.sh"
       - "scripts/**"
+      - ".github/workflows/release.yml"
   workflow_dispatch:
     inputs:
       bump:
