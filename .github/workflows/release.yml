@@ -1,0 +1,62 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Which part of the version to increase
+        type: choice
+        options: [patch, minor, major]
+        default: patch
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build, sign, and publish
+    if: github.ref == 'refs/heads/main'
+    runs-on: macos-26
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Resolve the version
+        id: version
+        env:
+          BUMP: ${{ inputs.bump }}
+        run: scripts/next-version.sh "$BUMP" >> "$GITHUB_OUTPUT"
+      - name: Test
+        run: make test
+      - name: Import the signing identity
+        env:
+          MACOS_CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
+          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+        run: scripts/signing.sh ci-import
+      - name: Build and verify the release app
+        env:
+          APP_VERSION: ${{ steps.version.outputs.version }}
+          APP_BUILD: ${{ steps.version.outputs.build }}
+        run: make build-release verify
+      - name: Package, sign, and notarize the disk image
+        env:
+          NOTARY_KEY: ${{ secrets.NOTARY_KEY }}
+          NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
+          NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
+        run: scripts/package.sh
+      - name: Publish the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          name="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleName' Resources/Info.plist)"
+          gh release create "$TAG" --target "$GITHUB_SHA" --title "$name $TAG" --generate-notes \
+            "dist/$name.dmg" "dist/$name.dmg.sha256"
