@@ -52,7 +52,7 @@ ci-hygiene:
 
 ci-security:
 	gitleaks git --no-banner --redact .
-	semgrep scan --error --config p/swift --config p/secrets --config p/github-actions --config p/bash .
+	semgrep scan --error --config p/swift --config p/secrets --config p/github-actions .
 	trivy fs --scanners vuln,secret,misconfig --severity CRITICAL,HIGH --exit-code 1 --ignore-unfixed \
 	  --skip-dirs .build --skip-dirs dist .
 

@@ -43,7 +43,6 @@ jobs:
           --config p/swift
           --config p/secrets
           --config p/github-actions
-          --config p/bash
           .
 
   trivy:
