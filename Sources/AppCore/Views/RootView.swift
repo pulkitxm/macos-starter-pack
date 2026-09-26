@@ -31,7 +31,6 @@ struct RootView: View {
                 .help("Shuffle the pack")
             }
         }
-        .frame(minWidth: 720, minHeight: 460)
         .onChange(of: packSize) {
             store.shuffle(size: packSize)
         }

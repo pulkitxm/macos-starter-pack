@@ -30,7 +30,6 @@ struct HomeView: View {
                 }
             }
             .padding(32)
-            .frame(maxWidth: 860, alignment: .leading)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .navigationTitle("Home")
